@@ -209,7 +209,7 @@ include 'Home.php';
                 imprimerDiv.appendChild(photoMagasin.cloneNode(true));
 
                 // Créer une fenêtre d'impression
-                const printWindow = window.open('', '', 'width=200,height=300');
+                const printWindow = window.open('', '', 'width=900,height=600');
                 printWindow.document.open();
                 printWindow.document.write('<html><head><title>Impression</title></head><body>');
                 printWindow.document.write(imprimerDiv.innerHTML);
