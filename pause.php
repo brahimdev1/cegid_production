@@ -1,6 +1,6 @@
 <?php
 // Connexion à la base de données SQL Server
-$serverName = "serveurmedidis2";
+$serverName = "192.168.1.177";
 $connectionOptions = array(
     "Database" => "MEDIDISCEGIDREELLE",
     "Uid" => "SA",
