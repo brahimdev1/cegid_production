@@ -5,7 +5,7 @@ include 'connexion.php';
 
 
 // Your SQL query
-$sql = "SELECT GL_REFEXTERNE, GL_DATEPIECE, GL_LIBELLE, GL_DATELIVRAISON,GL_QTERESTE, DATEDIFF(DAY, GL_DATEPIECE + 3, GETDATE()) as temps_Reste
+$sql = "SELECT GL_REFEXTERNE, GL_DATEPIECE, GL_NUMERO , GL_LIBELLE, GL_DATELIVRAISON,GL_QTERESTE, DATEDIFF(DAY, GL_DATEPIECE + 3, GETDATE()) as temps_Reste
         FROM ligne
         WHERE GL_ARTICLE IS NOT NULL AND GL_ARTICLE <> '' AND GL_NATUREPIECEG = 'CC' AND
         GL_DATEPIECE >= '2023-16-05 00:00:00.000' AND GL_LIBREART8 = 'ATL' AND GL_ETATSOLDE = 'ENC' 
@@ -62,6 +62,7 @@ if ($stmt === false) {
         <tr>
             <th>Client</th>
             <th class="text-center" style="width: 120px">Date Saisie</th>
+            <th>NºCmd</th>
             <th>Designation</th>
             <th class="text-center" style="width: 120px" >Date livraison</th>
             <th>Quantite</th>
@@ -73,6 +74,7 @@ if ($stmt === false) {
             echo "<tr>";
             echo "<td>" . $row['GL_REFEXTERNE'] . "</td>";
             echo "<td >" . $row['GL_DATEPIECE']->format('d-m-Y ') . "</td>";
+            echo "<td>" . $row['GL_NUMERO'] . "</td>";
             echo "<td>" . $row['GL_LIBELLE'] . "</td>";
             echo "<td>" . $row['GL_DATELIVRAISON']->format('d-m-Y ') . "</td>";
             echo "<td>" . $row['GL_QTERESTE'] . "</td>";
