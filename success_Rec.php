@@ -53,7 +53,7 @@
     // Vérifier si le bouton "Retour" a été cliqué
     if (isset($_POST['retour'])) {
         // Rediriger vers la page login.php
-        header("Location: home.php");
+        header("Location: get,post.php");
         exit(); // Assure que le script se termine après la redirection
     }
     ?>
