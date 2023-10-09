@@ -136,9 +136,9 @@ while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     echo "<tr>";
     echo "<td>" . $row['WOP_LIGNEORDRE'] . "</td>";
     echo "<td>" . $row['WOP_PHASELIB'] . "</td>";
-    echo "<td>" . number_format($row['WOP_QACCSAIS'], 4) . "</td>";
-    echo "<td>" . number_format($row['WOP_QLANSAIS'], 4) . "</td>";
-    echo "<td>" . number_format($row['WOP_QRECSAIS'], 4) . "</td>";
+    echo "<td style='text-align: center;'>" . number_format($row['WOP_QACCSAIS'], ) . "</td>";
+    echo "<td style='text-align: center;'>" . number_format($row['WOP_QLANSAIS'], ) . "</td>";
+    echo "<td style='text-align: center;'>" . number_format($row['WOP_QRECSAIS'], ) . "</td>";
     echo "<td>" . ($row['time_in'] ? $row['time_in']->format('Y-m-d H:i:s') : '') . "</td>";
     echo "<td>" . ($row['time_out'] ? $row['time_out']->format('Y-m-d H:i:s') : '') . "</td>";
     echo "<td>" . $row['difference'] . "</td>";
