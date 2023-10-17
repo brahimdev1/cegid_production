@@ -2,21 +2,23 @@
 include 'connexion.php';
 include 'home.php';
 
-
 // Votre requête SQL
 $sql = "
-Select  GPA_LIBELLE,RD8_RD8LIBDATE4,WOL_NUMERO,WOL_LIGNEORDRE,WOL_CODEARTICLE,WOL_LIBELLE ,WOL_QACCSAIS,WOL_LIBELLE,WOP_QACCSAIS, CAST(WOP_QLANSAIS AS INT) AS WOP_QLANSAIS,
-CAST(WOP_QRECSAIS AS INT) AS WOP_QRECSAIS, WOP_PHASELIB from WORDRELIG,PIECEADRESSE,RTINFOS008,WORDREPHASE
-where CAST(WOL_DATECREATION as date)= '2023-10-10' AND WOL_TYPEORDRE='VTE' 
-and GPA_NUMERO = WOL_NUMERO AND GPA_SOUCHE='MCC'AND GPA_TYPEPIECEADR='001'
-AND RD8_CLEDATA  LIKE '%' + CAST(WOL_NUMERO AS VARCHAR(255)) + '%' and  RD8_CLEDATA LIKE '%CC%' and  RD8_CLEDATA LIKE '%000001%'
-AND WOP_LIGNEORDRE = WOL_LIGNEORDRE AND WOP_PHASE NOT IN ('L11','L12','L18','L19') 
+SELECT WOL_NUMERO, WOL_LIGNEORDRE, WOL_CODEARTICLE, WOL_LIBELLE, WOL_QACCSAIS, CAST(WOP_QLANSAIS AS INT) AS WOP_QLANSAIS,
+    CAST(WOP_QRECSAIS AS INT) AS WOP_QRECSAIS, WOP_PHASELIB,time_in, time_out, difference
+FROM WORDRELIG
+JOIN WORDREPHASE ON WOP_LIGNEORDRE = WOL_LIGNEORDRE
+WHERE WOL_CHARLIBRE1 IS NOT NULL
+    AND (WOL_TYPEORDRE = 'NUL' OR WOL_TYPEORDRE = 'VTE')
+ AND  ( WOP_LIGNEORDRE = 2166 OR WOP_LIGNEORDRE = 2168 OR WOP_LIGNEORDRE = 2171 OR WOP_LIGNEORDRE = 2172 OR WOP_LIGNEORDRE = 2175 OR WOP_LIGNEORDRE = 2178 OR WOP_LIGNEORDRE = 2181 OR WOP_LIGNEORDRE = 2182  OR WOP_LIGNEORDRE = 2183 OR WOP_LIGNEORDRE = 2184)
+    AND WOP_PHASE NOT IN ('L11', 'L12', 'L18', 'L19', 'L16', 'L17');
+
 ";
 
 $stmt = sqlsrv_query($conn, $sql);
 
 if ($stmt === false) {
-die(print_r(sqlsrv_errors(), true));
+    die(print_r(sqlsrv_errors(), true));
 }
 ?>
 <!DOCTYPE html>
@@ -34,16 +36,15 @@ die(print_r(sqlsrv_errors(), true));
     <style>
         table {
             border-collapse: collapse;
-            width: 100%;
+            border : 3px solid black;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid black;
             padding: 8px;
             text-align: center;
         }
-
-     
 
         .green-bg {
             background-color: green;
@@ -52,64 +53,64 @@ die(print_r(sqlsrv_errors(), true));
         .bold-text {
             font-weight: bold;
         }
+        /* Ajoutez un style pour mettre en gras chaque quatrième ligne */
+        tr:nth-child(4n) {
+            font-weight: bold;
+        }
     </style>
     <table class="table table-bordered text-center">
         <tr>
-            <th colspan="8"></th>
-            <th colspan="2">Etat actuelle</th>
+            <th colspan="6"></th>
+            <th colspan="5">Etat actuel</th>
         </tr>
         <tr>
-            <th style="width: 300px;">Client</th>
-            <th style="width: 200px;">Date Cde</th>
-            <th>Nºcde</th>
-            <th>OF</th>
-            <th>REF</th>
-            <th style="width: 300px;">LIBELLE</th>
-            <th>QTE</th>
-            <th>PHASE</th>
+            <th style="width: 150px;">nºcmd</th>
+            <th style="width: 150px;">OF</th>
+            <th>Code Article</th>
+            <th style="width: 300px;">Libelle</th>
+            <th>Qte Commande</th>
+            <th>phase</th>
             <th>ENTRE</th>
             <th>SORTIE</th>
+            <th style="width: 150px;">temps de début</th>
+            <th style="width: 150px;">temps de fin</th>
+            <th>temps cycle/min</th>
         </tr>
         <?php
-        $previousGpaLibelle = null;
-        $previousRd8Rd8LibDate4 = null;
         $previousWolNumero = null;
         $previousWolLigneOrdre = null;
         $previousWolCodeArticle = null;
         $previousWolLibelle = null;
         $previousWolQAccSais = null;
 
+        $rowNumber = 0;
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            echo "<tr>";
-            
-            // GPA_LIBELLE
-            $isGpaLibelleDifferent = $row['GPA_LIBELLE'] != $previousGpaLibelle;
-            echo "<td" . ($isGpaLibelleDifferent ? ' class="bold-text"' : '') . ">" . $row['GPA_LIBELLE'] . "</td>";
-            
-            // RD8_RD8LIBDATE4
-            $isRd8Rd8LibDate4Different = $row['RD8_RD8LIBDATE4'] != $previousRd8Rd8LibDate4;
-            echo "<td" . ($isRd8Rd8LibDate4Different ? ' class="bold-text"' : '') . ">" . $row['RD8_RD8LIBDATE4']->format('d-m-Y ') . "</td>";
+            if ($rowNumber % 4 === 0) {
+                echo '<tr class="bold-text">';
+            } else {
+                echo '<tr>';
+            }
 
             // WOL_NUMERO
             $isWolNumeroDifferent = $row['WOL_NUMERO'] != $previousWolNumero;
             echo "<td" . ($isWolNumeroDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_NUMERO'] . "</td>";
-            
+
             // WOL_LIGNEORDRE
             $isWolLigneOrdreDifferent = $row['WOL_LIGNEORDRE'] != $previousWolLigneOrdre;
             echo "<td" . ($isWolLigneOrdreDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_LIGNEORDRE'] . "</td>";
-            
+
             // WOL_CODEARTICLE
             $isWolCodeArticleDifferent = $row['WOL_CODEARTICLE'] != $previousWolCodeArticle;
             echo "<td" . ($isWolCodeArticleDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_CODEARTICLE'] . "</td>";
-            
+
             // WOL_LIBELLE
             $isWolLibelleDifferent = $row['WOL_LIBELLE'] != $previousWolLibelle;
             echo "<td" . ($isWolLibelleDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_LIBELLE'] . "</td>";
-            
+
             // WOL_QACCSAIS
             $isWolQAccSaisDifferent = $row['WOL_QACCSAIS'] != $previousWolQAccSais;
             echo "<td" . ($isWolQAccSaisDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_QACCSAIS'] . "</td>";
-            
+
             echo "<td>" . $row['WOP_PHASELIB'] . "</td>";
 
             $wopQlansais = (int) $row['WOP_QLANSAIS'];
@@ -118,19 +119,26 @@ die(print_r(sqlsrv_errors(), true));
             // Appliquer la classe 'green-bg' si l'une des valeurs est différente de 0
             echo "<td" . ($wopQlansais !== 0 ? ' class="green-bg"' : '') . ">" . $wopQlansais . "</td>";
             echo "<td" . ($wopQrecsais !== 0 ? ' class="green-bg"' : '') . ">" . $wopQrecsais . "</td>";
+            echo "<td>" . ($row['time_in'] ? $row['time_in']->format('Y-m-d H:i:s') : '') . "</td>";
+            echo "<td>" . ($row['time_out'] ? $row['time_out']->format('Y-m-d H:i:s') : '') . "</td>";
+            echo "<td>" . $row['difference'] . "</td>";
 
-            echo "</tr>";
+            echo '</tr>';
+            $rowNumber++;
 
-            // Mettre à jour les valeurs précédentes
-            $previousGpaLibelle = $row['GPA_LIBELLE'];
-            $previousRd8Rd8LibDate4 = $row['RD8_RD8LIBDATE4'];
-            $previousWolNumero = $row['WOL_NUMERO'];
-            $previousWolLigneOrdre = $row['WOL_LIGNEORDRE'];
-            $previousWolCodeArticle = $row['WOL_CODEARTICLE'];
-            $previousWolLibelle = $row['WOL_LIBELLE'];
-            $previousWolQAccSais = $row['WOL_QACCSAIS'];
+            // Réinitialisez le compteur de ligne après chaque 4e ligne
+            if ($rowNumber >= 4) {
+                $rowNumber = 0;
+                // Mettez à jour les valeurs précédentes ici
+                $previousWolNumero = $row['WOL_NUMERO'];
+                $previousWolLigneOrdre = $row['WOL_LIGNEORDRE'];
+                $previousWolCodeArticle = $row['WOL_CODEARTICLE'];
+                $previousWolLibelle = $row['WOL_LIBELLE'];
+                $previousWolQAccSais = $row['WOL_QACCSAIS'];
+            }
         }
         ?>
     </table>
 </body>
+
 </html>
