@@ -7,6 +7,7 @@ $database = ""; // Nom de la base de données (sera défini par l'utilisateur)
 $username = "SA"; // Nom d'utilisateur de la base de données
 $password = "cegid.2008"; // Mot de passe de la base de données
 
+
 // Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $selectedDb = $_POST["database"];
@@ -23,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Connexion à la base de données sélectionnée
-    $conn = sqlsrv_connect($server, array("Database" => $selectedDb, "UID" => $username, "PWD" => $password));
+    $conn = sqlsrv_connect($server, array("Database" => $selectedDb, "UID" => $username, "PWD" => $password,"TrustServerCertificate"=>true));
     if ($conn === false) {
         die(print_r(sqlsrv_errors(), true));
     }

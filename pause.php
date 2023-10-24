@@ -1,17 +1,6 @@
 <?php
 // Connexion à la base de données SQL Server
-$serverName = "192.168.1.177";
-$connectionOptions = array(
-    "Database" => "MEDIDISCEGIDREELLE",
-    "Uid" => "SA",
-    "PWD" => "cegid.2008"
-);
-$conn = sqlsrv_connect($serverName, $connectionOptions);
-
-// Vérification de la connexion à la base de données
-if ($conn === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
+include'connexion.php';
 
 // Traitement du formulaire
 if (isset($_POST['submit_lancer']) && isset($_POST['num_fabrication'])) {

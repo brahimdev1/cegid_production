@@ -131,7 +131,7 @@
 					<i class="material-icons">grid_on</i><span>Gestion</span></a>
                     <ul class="collapse list-unstyled menu" id="pageSubmenu6">
                         <li>
-                            <a href="marche.php">Production Appel d'offre</a>
+                            <a href="Monitoring.php">Suivie de Production</a>
                         </li>
                      
                     </ul>

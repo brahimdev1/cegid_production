@@ -3,7 +3,8 @@ $serverName = "192.168.1.177";
 $connectionOptions = array(
     "Database" => "MEDIDISCEGIDREELLE",
     "Uid" => "SA",
-    "PWD" => "cegid.2008"
+    "PWD" => "cegid.2008",
+    "TrustServerCertificate"=>true
 );
 
 $conn = sqlsrv_connect($serverName, $connectionOptions);
