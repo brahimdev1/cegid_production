@@ -5,8 +5,8 @@ include 'connexion.php';
 
 
 // Your SQL query
-$sql = "SELECT GL_REFEXTERNE, GL_DATEPIECE, GL_NUMERO , GL_LIBELLE, GL_DATELIVRAISON,GL_QTERESTE, DATEDIFF(DAY, GL_DATEPIECE + 3, GETDATE()) as temps_Reste
-        FROM ligne
+$sql = "SELECT GL_REFEXTERNE,WOL_LIGNEORDRE, GL_DATEPIECE, GL_NUMERO , GL_LIBELLE, GL_DATELIVRAISON,GL_QTERESTE, DATEDIFF(DAY, GL_DATEPIECE + 3, GETDATE()) as temps_Reste
+        FROM ligne LEFT JOIN WORDRELIG ON LIGNE.GL_NUMERO=WORDRELIG.WOL_NUMERO
         WHERE GL_ARTICLE IS NOT NULL AND GL_ARTICLE <> '' AND GL_NATUREPIECEG = 'CC' AND
         GL_DATEPIECE >= '2023-16-05 00:00:00.000' AND GL_LIBREART8 = 'ATL' AND GL_ETATSOLDE = 'ENC' 
         ORDER BY temps_Reste DESC";
@@ -61,6 +61,8 @@ if ($stmt === false) {
     <table>
         <tr>
             <th>Client</th>
+            <th>OF</th>
+
             <th class="text-center" style="width: 120px">Date Saisie</th>
             <th>NºCmd</th>
             <th>Designation</th>
@@ -73,6 +75,7 @@ if ($stmt === false) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             echo "<tr>";
             echo "<td>" . $row['GL_REFEXTERNE'] . "</td>";
+            echo "<td>" . (isset($row['WOL_LIGNEORDRE']) ? $row['WOL_LIGNEORDRE'] : 'non géneré') . "</td>";
             echo "<td >" . $row['GL_DATEPIECE']->format('d-m-Y ') . "</td>";
             echo "<td>" . $row['GL_NUMERO'] . "</td>";
             echo "<td>" . $row['GL_LIBELLE'] . "</td>";

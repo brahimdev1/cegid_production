@@ -1,156 +1,156 @@
 <?php
 include 'connexion.php';
 include 'home.php';
-
-// Votre requête SQL
-$sql = "
-SELECT  GPA_LIBELLE, WOL_NUMERO, WOL_LIGNEORDRE, WOL_CODEARTICLE, WOL_LIBELLE, CAST(WOL_QACCSAIS AS INT) AS WOL_QACCSAIS, CAST(WOP_QLANSAIS AS INT) AS WOP_QLANSAIS,
-CAST(WOP_QRECSAIS AS INT) AS WOP_QRECSAIS, WOP_PHASELIB, time_in, time_out, difference
-FROM WORDRELIG
-JOIN WORDREPHASE ON WOP_LIGNEORDRE = WOL_LIGNEORDRE LEFT JOIN PIECEADRESSE ON PIECEADRESSE.GPA_NUMERO = WORDRELIG.WOL_NUMERO 
-AND PIECEADRESSE.GPA_NATUREPIECEG = 'CC'
-AND PIECEADRESSE.GPA_TYPEPIECEADR = '001'
-WHERE WOL_CHARLIBRE1 IS NOT NULL
-AND (
-(WOL_TYPEORDRE = 'NUL' OR WOL_TYPEORDRE = 'VTE')
-AND   wol_ligneordre=2220 OR wol_ligneordre=2217 OR wol_ligneordre=2214 OR wol_ligneordre=2257 OR wol_ligneordre=2236 OR wol_ligneordre=2254 
-OR wol_ligneordre=2260 OR wol_ligneordre=2226 OR wol_ligneordre=2284 OR wol_ligneordre=2290 OR wol_ligneordre=2287 OR wol_ligneordre=2302
-OR wol_ligneordre=2295 OR wol_ligneordre=2199 OR wol_ligneordre=2248 OR wol_ligneordre=2242 OR wol_ligneordre=2245 OR wol_ligneordre=2263
-OR wol_ligneordre=2264 OR wol_ligneordre=2265 OR wol_ligneordre=2266 OR wol_ligneordre=2268 OR wol_ligneordre=2269 OR wol_ligneordre=2293
-OR wol_ligneordre=2294 OR wol_ligneordre=2295 )
-AND WOP_PHASE NOT IN ('L11', 'L12', 'L18', 'L19', 'L16', 'L17') 
-
-";
-
-$stmt = sqlsrv_query($conn, $sql);
-
-if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
-
-<body>
     <style>
+       
+
         table {
             border-collapse: collapse;
-            border : 3px solid black;
+            width: 100%;
         }
 
-
-        .green-bg {
-            background-color: green;
+        th, td {
+            border: 1px solid black;
+            padding: 4px;
+            text-align: center;
         }
 
-        .bold-text {
-            font-weight: bold;
-        }
-        /* Ajoutez un style pour mettre en gras chaque quatrième ligne */
-        tr:nth-child(4n) {
-            font-weight: bold;
-        }
-        .bigth{
-            width : 300px
-        }
-        .smallth{
-            width : 100px
+        th {
+            background-color: #f2f2f2;
         }
     </style>
-    <table class="table table-bordered text-center">
-        <tr>
-            <th colspan="6"></th>
-            <th colspan="5">Etat actuel</th>
-        </tr>
-        <tr>
-            <th class="bigth">Client</th>
-            <th >nºcmd</th>
-            <th >OF</th>
-            <th>Code Article</th>
-            <th class="bigth">Libelle</th>
-            <th>Qte Commande</th>
-            <th>phase</th>
-            <th>ENTRE</th>
-            <th>SORTIE</th>
-            <th class="smallth">temps de début</th>
-            <th class="smallth">temps de fin</th>
-            <th>temps cycle/min</th>
-        </tr>
-        <?php
-        $previousgpalibelle = null;
-        $previousWolNumero = null;
-        $previousWolLigneOrdre = null;
-        $previousWolCodeArticle = null;
-        $previousWolLibelle = null;
-        $previousWolQAccSais = null;
+</head>
+<body>
+<h2 style="text-align:center"> Etat de Carnet de Commmande Matelas</h2>
 
-        $rowNumber = 0;
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            if ($rowNumber % 4 === 0) {
-                echo '<tr class="bold-text">';
-            } else {
-                echo '<tr>';
-            }
 
-            // Gpa_libelle
-            $isWolclientDifferent = $row['GPA_LIBELLE'] != $previousgpalibelle;
-            echo "<td" . ($isWolclientDifferent ? ' class="bold-text"' : '') . ">" . $row['GPA_LIBELLE'] . "</td>";
-            // WOL_NUMERO
-            $isWolNumeroDifferent = $row['WOL_NUMERO'] != $previousWolNumero;
-            echo "<td" . ($isWolNumeroDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_NUMERO'] . "</td>";
 
-            // WOL_LIGNEORDRE
-            $isWolLigneOrdreDifferent = $row['WOL_LIGNEORDRE'] != $previousWolLigneOrdre;
-            echo "<td" . ($isWolLigneOrdreDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_LIGNEORDRE'] . "</td>";
+<?php
 
-            // WOL_CODEARTICLE
-            $isWolCodeArticleDifferent = $row['WOL_CODEARTICLE'] != $previousWolCodeArticle;
-            echo "<td" . ($isWolCodeArticleDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_CODEARTICLE'] . "</td>";
 
-            // WOL_LIBELLE
-            $isWolLibelleDifferent = $row['WOL_LIBELLE'] != $previousWolLibelle;
-            echo "<td" . ($isWolLibelleDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_LIBELLE'] . "</td>";
+// Exécutez la requête SQL
+$sql = "SELECT GPA_LIBELLE, WOL_NUMERO, WOL_LIGNEORDRE, WOL_CODEARTICLE, WOL_LIBELLE, cast(WOP_QACCSAIS as int) as WOP_QACCSAIS,cast(WOP_QLANSAIS as int) as WOP_QLANSAIS,
+cast(WOP_QRECSAIS as int) as WOP_QRECSAIS
+        FROM WORDRELIG
+        INNER JOIN WORDREPHASE ON WORDREPHASE.WOP_LIGNEORDRE = WORDRELIG.WOL_LIGNEORDRE
+        LEFT JOIN PIECEADRESSE ON PIECEADRESSE.GPA_NUMERO = WORDRELIG.WOL_NUMERO 
+        AND PIECEADRESSE.GPA_NATUREPIECEG = 'CC'
+        AND PIECEADRESSE.GPA_TYPEPIECEADR = '001'
+        WHERE WOL_CHARLIBRE1 IS NOT NULL
+        AND (
+            (WOL_TYPEORDRE = 'NUL' OR WOL_TYPEORDRE = 'VTE')
+            AND    wol_ligneordre=2332 OR wol_ligneordre=2320 OR wol_ligneordre=2323 OR wol_ligneordre=2335
+OR wol_ligneordre=2326 OR wol_ligneordre=2329  OR wol_ligneordre=2341 OR wol_ligneordre=2347 OR wol_ligneordre=2350  OR wol_ligneordre=2353
+OR wol_ligneordre=2347 OR wol_ligneordre=2371 OR wol_ligneordre=2362 OR wol_ligneordre=2368 OR wol_ligneordre=2365 OR wol_ligneordre=2374 OR wol_ligneordre=2377 
+OR wol_ligneordre=2380 OR wol_ligneordre=2386 OR wol_ligneordre=2389 OR wol_ligneordre=2392 OR wol_ligneordre=2263 OR wol_ligneordre=2164 OR wol_ligneordre=2266 
+OR wol_ligneordre=2398 OR wol_ligneordre=2401 OR wol_ligneordre=2407 OR wol_ligneordre=2404 OR wol_ligneordre=2410 OR wol_ligneordre=2413)
+        AND WOP_PHASE NOT IN ('L11', 'L12', 'L18', 'L19', 'L16', 'L17')";
 
-            // WOL_QACCSAIS
-            $isWolQAccSaisDifferent = $row['WOL_QACCSAIS'] != $previousWolQAccSais;
-            echo "<td" . ($isWolQAccSaisDifferent ? ' class="bold-text"' : '') . ">" . $row['WOL_QACCSAIS'] . "</td>";
+$query = sqlsrv_query($conn, $sql);
 
-            echo "<td>" . $row['WOP_PHASELIB'] . "</td>";
+if (!$query) {
+    die("La requête a échoué: " . print_r(sqlsrv_errors(), true));
+}
 
-            $wopQlansais = (int) $row['WOP_QLANSAIS'];
-            $wopQrecsais = (int) $row['WOP_QRECSAIS'];
+// Initialisation des variables pour le suivi de la ligne récente
+$lastLine = null;
+$mergedData = [];
 
-            // Appliquer la classe 'green-bg' si l'une des valeurs est différente de 0
-            echo "<td" . ($wopQlansais !== 0 ? ' class="green-bg"' : '') . ">" . $wopQlansais . "</td>";
-            echo "<td" . ($wopQrecsais !== 0 ? ' class="green-bg"' : '') . ">" . $wopQrecsais . "</td>";
-            echo "<td>" . ($row['time_in'] ? $row['time_in']->format('Y-m-d H:i:s') : '') . "</td>";
-            echo "<td>" . ($row['time_out'] ? $row['time_out']->format('Y-m-d H:i:s') : '') . "</td>";
-            echo "<td>" . $row['difference'] . "</td>";
-
-            echo '</tr>';
-            $rowNumber++;
-
-            // Réinitialisez le compteur de ligne après chaque 4e ligne
-            if ($rowNumber >= 4) {
-                $rowNumber = 0;
-                // Mettez à jour les valeurs précédentes ici
-                $previousWolNumero = $row['WOL_NUMERO'];
-                $previousWolLigneOrdre = $row['WOL_LIGNEORDRE'];
-                $previousWolCodeArticle = $row['WOL_CODEARTICLE'];
-                $previousWolLibelle = $row['WOL_LIBELLE'];
-                $previousWolQAccSais = $row['WOL_QACCSAIS'];
-            }
+// Parcourir les résultats
+while ($row = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)) {
+    $currentLine = $row["WOL_LIGNEORDRE"];
+    
+    // Vérifier si la ligne actuelle est la même que la ligne précédente
+    if ($currentLine !== $lastLine) {
+        // Si la ligne est différente, ajoutez les données fusionnées au tableau
+        if ($lastLine !== null) {
+            $mergedData[] = $mergedRow;
         }
-        ?>
-    </table>
-</body>
+        
+        // Réinitialiser les données fusionnées pour la nouvelle ligne
+        $mergedRow = $row;
+        $lastLine = $currentLine;
+    } else {
+        // Fusionner les colonnes WOL_QLANSAIS et WOL_QRECSAIS horizontalement
+        $mergedRow["WOP_QLANSAIS"] .= " " . $row["WOP_QLANSAIS"];
+        $mergedRow["WOP_QRECSAIS"] .= " " . $row["WOP_QRECSAIS"];
+    }
+}
 
+// Ajouter la dernière ligne fusionnée au tableau
+if ($lastLine !== null) {
+    $mergedData[] = $mergedRow;
+}
+
+// Afficher les résultats dans un tableau HTML
+echo "<table border='1px'>";
+echo "<tr>";
+echo "<th colspan='6'></th>";
+echo "<th colspan='2'>Garnissage</th>";
+echo "<th colspan='2'>Habillage</th>";
+echo "<th colspan='2'>Bordeuse</th>";
+echo "<th colspan='2'>Emballage</th>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>CLIENT</th>";
+echo "<th>NºCMD</th>";
+echo "<th>NºOF</th>";
+echo "<th>CODE ARTICLE</th>";
+echo "<th>LIBELLE</th>";
+echo "<th>QTE QMD</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "</tr>";
+
+foreach ($mergedData as $row) {
+    echo "<tr>";
+    echo "<td>" . (isset($row['GPA_LIBELLE']) ? $row['GPA_LIBELLE'] : 'STOCK') . "</td>";
+    echo "<td>" . $row["WOL_NUMERO"] . "</td>";
+    echo "<td>" . $row["WOL_LIGNEORDRE"] . "</td>";
+    echo "<td>" . $row["WOL_CODEARTICLE"] . "</td>";
+    echo "<td>" . $row["WOL_LIBELLE"] . "</td>";
+    echo "<td>" . $row["WOP_QACCSAIS"] . "</td>";
+
+    // Afficher WOP_QLANSAIS et WOP_QRECSAIS dans des colonnes distinctes
+    $qlansaisValues = explode(" ", $row["WOP_QLANSAIS"]);
+    $qrecsaisValues = explode(" ", $row["WOP_QRECSAIS"]);
+
+    // Assurez-vous que les deux tableaux ont la même longueur
+    $count = max(count($qlansaisValues), count($qrecsaisValues));
+
+    for ($i = 0; $i < $count; $i++) {
+        $qlansais = isset($qlansaisValues[$i]) ? $qlansaisValues[$i] : "";
+        $qrecsais = isset($qrecsaisValues[$i]) ? $qrecsaisValues[$i] : "";
+
+        // Vérifiez si la valeur est différente de zéro et colorez en vert si nécessaire
+        $qlansaisStyle = ($qlansais != 0) ? 'style="background-color: green;color:black;"' : '';
+        $qrecsaisStyle = ($qrecsais != 0) ? 'style="background-color: green;color:black;"' : '';
+
+        echo "<td $qlansaisStyle>$qlansais</td><td $qrecsaisStyle>$qrecsais</td>";
+    }
+
+    echo "</tr>";
+}
+
+echo "</table>";
+
+
+// Fermer la connexion à la base de données
+sqlsrv_close($conn);
+
+?>
+</body>
 </html>

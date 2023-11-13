@@ -1,6 +1,5 @@
-<?php include 'pause.php' ?>
+<?php include 'pause.php';
 
-<?php
 include'connexion.php';
 
 // Traitement de la soumission du formulaire
