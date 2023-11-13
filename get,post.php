@@ -1,6 +1,6 @@
-<?php include 'pause.php';
+<?php include 'pause.php' ;
+include 'connexion.php';
 
-include'connexion.php';
 
 // Traitement de la soumission du formulaire
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -21,72 +21,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Vérifier si le formulaire a été soumis pour lancer la production
         if (isset($_POST["submit_lancer"])) {
             // Vérifier si la quantité restante est supérieure à zéro
-            if ($qteRestante > 0) {
+            if ($qteReceptionnee == 0 )  {
                 $quantite = $_POST["quantite"];
                 $nouvelleQteLancee = $qteLancee + $quantite;
-
+        
                 // Mettre à jour la quantité lancée dans la table
-                $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ? WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
+                $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ?, WOP_ETATPHASE='LAN' WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
                 $params = array($nouvelleQteLancee, $numFabrication);
                 $result = sqlsrv_query($conn, $sql, $params);
-
-                if ($result !== false) {
-                    // Récupérer les valeurs actualisées depuis la base de données
-                    $sql = "SELECT WOP_QACCSAIS, WOP_QLANSAIS, WOP_QRECSAIS FROM WORDREPHASE WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
-                    $params = array($numFabrication);
-                    $result = sqlsrv_query($conn, $sql, $params);
-                    $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
-
-                    $qteAccepte = $row["WOP_QACCSAIS"];
-                    $qteLancee = $row["WOP_QLANSAIS"];
-                    $qteReceptionnee = $row["WOP_QRECSAIS"];
-
-                    // Redirection vers la page success.php après le traitement du formulaire
-                    echo "<script> window.location.href='success_Lan.php';</script>";
-
-                } else {
-                  
+        
+                if ($result === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
+        
+                // Redirection vers la page success.php après le traitement du formulaire
+                echo "<script> window.location.href='success_Lan.php';</script>";
+            } else {
+                // Mettre à jour la quantité lancée dans la table
+                $quantite = $_POST["quantite"];
+                $nouvelleQteLancee = $qteLancee + $quantite;
+                $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ?, WOP_ETATPHASE='REC' WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
+                $params = array($nouvelleQteLancee, $numFabrication);
+                $result = sqlsrv_query($conn, $sql, $params);
+        
+                if ($result === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
+        
+                echo "<script> window.location.href='success_Lan.php';</script>";
                     ?>
-                    <div class="error">
-                        <?php   echo "Erreur lors du lancement de la quantité."; ?>
-                    </div>
+                    
                     <?php
                 }
             } else {
                
                 ?>
                 <div class="error">
-                    <?php  echo "Aucune action ne peut être effectuée. La quantité restante est égale à zéro."; ?>
+                    <?php  echo "Erreur de saisie d'rdre de fabrication."; ?>
                 </div>
                 <?php
             }
         }
 
-        // Vérifier si le formulaire a été soumis pour réceptionner la production
-        if (isset($_POST["submit_reception"])) {
-            // Vérifier si la quantité restante est supérieure à zéro
-            if ($qteRestante > 0) {
-                $quantite = $_POST["quantite"];
-                $nouvelleQteReceptionnee = $qteReceptionnee + $quantite;
-                $qteRestante = $qteAccepte - $nouvelleQteReceptionnee;
+       // Vérifier si le formulaire a été soumis pour réceptionner la production
+if (isset($_POST["submit_reception"])) {
+    // Vérifier si la quantité restante est supérieure à zéro
+    if ($qteRestante > 0 && $qteReceptionnee < $qteAccepte) {
+        $quantite = $_POST["quantite"];
+        $nouvelleQteReceptionnee = $qteReceptionnee + $quantite;
+        $qteRestante = $qteAccepte - $nouvelleQteReceptionnee;
 
-                // Mettre à jour la quantité réceptionnée et la quantité restante dans la table
-                $sql = "UPDATE WORDREPHASE SET WOP_QRECSAIS = ? WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
-                $params = array($nouvelleQteReceptionnee, $numFabrication);
-                $result = sqlsrv_query($conn, $sql, $params);
+        // Mettre à jour la quantité réceptionnée et la quantité restante dans la table
+        $sql = "UPDATE WORDREPHASE SET WOP_QRECSAIS = ?, WOP_ETATPHASE = ?,WOP_AVANCEQTE = ($nouvelleQteReceptionnee*100/$qteAccepte) WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
+        
+        // Si la quantité restante atteint zéro, mettre à jour WOP_ETATPHASE à 'TER'
+        $etatPhase = ($qteRestante == 0) ? 'TER' : 'REC';
+        
+        $params = array($nouvelleQteReceptionnee, $etatPhase, $numFabrication);
+        $result = sqlsrv_query($conn, $sql, $params);
 
-                if ($result !== false) {
-                    // Récupérer les valeurs actualisées depuis la base de données
-                    $sql = "SELECT WOP_QACCSAIS, WOP_QRECSAIS FROM WORDREPHASE WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
-                    $params = array($numFabrication);
-                    $result = sqlsrv_query($conn, $sql, $params);
-                    $row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC);
-
-                    $qteAccepte = $row["WOP_QACCSAIS"];
-                    $qteReceptionnee = $row["WOP_QRECSAIS"];
-
-                    // Redirection vers la page success.php après le traitement du formulaire
-                    echo "<script> window.location.href='success_Rec.php';</script>";
+        // Redirection vers la page success.php après le traitement du formulaire
+        echo "<script> window.location.href='success_Rec.php';</script>";
 
                 } else {
                     
@@ -100,19 +95,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 ?>
                 <div class="error">
-                    <?php echo "Aucune action ne peut être effectuée. La quantité restante est égale à zéro."; ?>
+                    <?php echo "Erreur de saisie d'rdre de fabrication."; ?>
                 </div>
                 <?php
             }
         }
-    } else {
-        ?>
-        <div class="error">
-            <?php echo "Le numéro de fabrication n'existe pas."; ?>
-        </div>
-        <?php
-}
-}
+  
+
 
 // ...
 
@@ -121,34 +110,15 @@ sqlsrv_close($conn);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Gestion de la production</title>
-    <script src="./node_modules/html5-qrcode/html5-qrcode.min.js"></script>
-    <link rel="icon" href="medidis.png" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.1/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
     <style>
-        .result {
-            background-color: green;
-            color: #fff;
-            padding: 20px;
-        }
-
-        .row {
-            display: flex;
-        }
-
+       
         .custom-margin {
-            margin-left: 10%;
-        }
-
-        .rec {
-            margin-top: 10px;
-        }
-
-        .dev {
-            margin-left: -25%;
-            margin-top: 10%;
+            margin-bottom: 15px;
         }
 
         .error {
@@ -204,16 +174,60 @@ sqlsrv_close($conn);
                 margin-top: 10px;
                 width: 100%;
             }
+            button{
+                background-color: #10D83A;
+                width: 250px;
+                display: block;
+                margin-left: 100 px;
+                margin-right: center;
+             
+
+            }
         }
         
     </style>
+  
+  <style>
+    /* Style pour l'overlay de chargement */
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
+        z-index: 1000; /* Assure que l'overlay est au-dessus de tout le reste */
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Style pour l'indicateur de chargement */
+    .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
 </head>
 <body>
 <?php include 'Home.php'; ?>
+<div class="overlay" id="loadingOverlay">
+    <div class="loader"></div>
+</div>
     <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <div class="dev">
             <div class="mb-3 custom-margin">
-                <label for="num_fabrication" class="form-label">Numéro de fabrication :</label>
+                <label for="num_fabrication" class="form-label">Code-barres :</label>
                 <input type="text" class="form-control" id="num_fabrication" name="num_fabrication" placeholder="Code-barres" required>
             </div>
 
@@ -221,24 +235,44 @@ sqlsrv_close($conn);
                 <label for="quantite" class="form-label">Quantité :</label>
                 <input type="number" class="form-control" id="quantite" name="quantite" placeholder="Qte a Saisir" required>
             </div>
-
+           
             <div class="d-grid gap-2 custom-margin">
                 <div class="lnc">
-                    <button type="submit" class="btn btn-primary" name="submit_lancer">Lancer la production</button>
-                </div>
+                    <button  class="btn"  name="submit_lancer" >Lancer la production</button>
+                </div><br>
                 <div class="rec">
-                    <button type="submit" class="btn btn-primary" name="submit_reception">Réceptionner la production</button>
+                    <button  class="btn"  name="submit_reception" ">Réceptionner la production</button>
                 </div>
+                
+
             </div>
         </div>
     </form>
+   <script>
+    // Affiche l'overlay de chargement
+function showLoadingOverlay() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
 
+// Masque l'overlay de chargement
+function hideLoadingOverlay() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// Exemple d'utilisation lors de la soumission du formulaire
+document.addEventListener('submit', function () {
+    showLoadingOverlay();
+});
+
+    </script>
     <main>
         <div id="reader"></div>
         <div id="result"></div>
     </main>
 
     <script>
+       
+
         const scanner = new Html5QrcodeScanner('reader', {
             qrbox: {
                 width: 250,
@@ -251,7 +285,6 @@ sqlsrv_close($conn);
 
         function success(result) {
             document.getElementById('num_fabrication').value = result;
-            // Met le résultat du scanner dans l'input avec l'id "num_fabrication"
 
             scanner.clear();
             document.getElementById('reader').remove();
