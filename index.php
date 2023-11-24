@@ -7,7 +7,6 @@ $database = ""; // Nom de la base de données (sera défini par l'utilisateur)
 $username = "SA"; // Nom d'utilisateur de la base de données
 $password = "cegid.2008"; // Mot de passe de la base de données
 
-
 // Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $selectedDb = $_POST["database"];
@@ -30,17 +29,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Vérification de l'utilisateur et du mot de passe
-    $inputUsername = $_POST["username"];
-    $inputPassword = $_POST["password"];
-    $sql = "SELECT * FROM utilisat WHERE US_ABREGE = ? AND US_TEL1 = ?";
-    $params = array($inputUsername, $inputPassword);
-    $stmt = sqlsrv_query($conn, $sql, $params);
+    // Vérification de l'utilisateur et du mot de passe
+$inputUsername = $_POST["username"];
+$inputPassword = $_POST["password"];
+$sql = "SELECT * FROM utilisat WHERE US_ABREGE = ? AND US_TEL1 = ?";
+$params = array($inputUsername, $inputPassword);
+$stmt = sqlsrv_query($conn, $sql, $params);
 
-    if ($stmt === false) {
-        die(print_r(sqlsrv_errors(), true));
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+$row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+if ($row) {
+    // L'utilisateur existe et le mot de passe est correct
+
+    // Stocker le nom d'utilisateur dans la session
+    $_SESSION["username"] = $row["username"];
+
+    // Utilisateur authentifié
+    $_SESSION["authenticated"] = true;
+
+    // Rediriger vers la page appropriée en fonction du type d'utilisateur
+    if ($row["usertype"] === "user" || $row["usertype"] === "admin") {
+        // Rediriger vers le tableau de bord
+        header("Location: home.php");
     }
-
-    $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    exit();
+} else {
+    // Nom d'utilisateur ou mot de passe incorrect
+    $errorMessage = "Nom d'utilisateur ou mot de passe incorrect.";
+}
 
     if ($row) {
         // L'utilisateur existe et le mot de passe est correct
@@ -60,6 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $errorMessage = "Nom d'utilisateur ou mot de passe incorrect.";
     }
 }
+
+
 ?>
 
 <!DOCTYPE html>

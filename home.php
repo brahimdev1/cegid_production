@@ -1,4 +1,11 @@
-<?php include 'connexion.php'?>
+<?php include 'connexion.php';
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    // Rediriger vers la page de connexion si l'utilisateur n'est pas authentifié
+    header('Location: index.php');
+    exit();
+}
+?>
 <!doctype html>
 <html lang="en">
   <head>
@@ -242,7 +249,7 @@ settings
 </span>Settings</a>
                                     </li>
                                     <li>
-                                        <a href="#"><span class="material-icons">
+                                        <a href="logout.php"><span class="material-icons">
 logout</span>Logout</a>
                                     </li>
                                 </ul>

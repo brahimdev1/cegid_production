@@ -239,7 +239,7 @@ sqlsrv_close($conn);
             <div class="d-grid gap-2 custom-margin">
                 <div class="lnc">
                     <button  class="btn"  name="submit_lancer" >Lancer la production</button>
-                </div><br>
+                </div>
                 <div class="rec">
                     <button  class="btn"  name="submit_reception" ">Réceptionner la production</button>
                 </div>
