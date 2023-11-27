@@ -1,5 +1,4 @@
 <?php
-session_start(); // Start the session
 include 'connexion.php';
 include 'Home.php'; 
 if (isset($_POST['suivreButton'])) {

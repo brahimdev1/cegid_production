@@ -1,0 +1,173 @@
+<?php
+include 'connexion.php';
+include 'home.php';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 4px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<br><br>
+<h2 style="text-align:center"> Etat de Suivie MARCHE Nº68/FA/DIV.G.F./DIV.M.EQ./ZN/2023/</h2>
+<br><br>
+
+
+
+
+<?php
+
+
+// Exécutez la requête SQL
+$sql = "SELECT GPA_LIBELLE, WOL_NUMERO, WOL_LIGNEORDRE,WOL_DATECREATION, WOL_CODEARTICLE, WOL_LIBELLE, cast(WOP_QACCSAIS as int) as WOP_QACCSAIS,cast(WOP_QLANSAIS as int) as WOP_QLANSAIS,
+cast(WOP_QRECSAIS as int) as WOP_QRECSAIS
+        FROM WORDRELIG
+        INNER JOIN WORDREPHASE ON WORDREPHASE.WOP_LIGNEORDRE = WORDRELIG.WOL_LIGNEORDRE
+        LEFT JOIN PIECEADRESSE ON PIECEADRESSE.GPA_NUMERO = WORDRELIG.WOL_NUMERO 
+        AND PIECEADRESSE.GPA_NATUREPIECEG = 'CC'
+        AND PIECEADRESSE.GPA_TYPEPIECEADR = '001'
+        WHERE WOL_CHARLIBRE1 IS NOT NULL
+        AND 
+            (WOL_TYPEORDRE = 'NUL' OR WOL_TYPEORDRE = 'VTE') AND WOL_LIGNEORDRE=2483
+           AND( WOL_ETATLIG='LAN' OR WOL_ETATLIG='REC'  OR WOL_ETATLIG='DEC' OR WOL_ETATLIG='TER') AND WOL_DEPOT='SI5' 
+                   AND WOP_PHASE NOT IN ('L11', 'L18', 'L19', 'L16') ORDER BY WOP_OPECIRC";
+
+$query = sqlsrv_query($conn, $sql);
+
+if (!$query) {
+    die("La requête a échoué: " . print_r(sqlsrv_errors(), true));
+}
+
+// Initialisation des variables pour le suivi de la ligne récente
+$lastLine = null;
+$mergedData = [];
+
+// Parcourir les résultats
+while ($row = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)) {
+    $currentLine = $row["WOL_LIGNEORDRE"];
+    
+    // Vérifier si la ligne actuelle est la même que la ligne précédente
+    if ($currentLine !== $lastLine) {
+        // Si la ligne est différente, ajoutez les données fusionnées au tableau
+        if ($lastLine !== null) {
+            $mergedData[] = $mergedRow;
+        }
+        
+        // Réinitialiser les données fusionnées pour la nouvelle ligne
+        $mergedRow = $row;
+        $lastLine = $currentLine;
+    } else {
+        // Fusionner les colonnes WOL_QLANSAIS et WOL_QRECSAIS horizontalement
+        $mergedRow["WOP_QLANSAIS"] .= " " . $row["WOP_QLANSAIS"];
+        $mergedRow["WOP_QRECSAIS"] .= " " . $row["WOP_QRECSAIS"];
+    }
+}
+
+// Ajouter la dernière ligne fusionnée au tableau
+if ($lastLine !== null) {
+    $mergedData[] = $mergedRow;
+}
+
+// Afficher les résultats dans un tableau HTML
+echo "<table border='1px'>";
+echo "<tr>";
+echo "<th colspan='7'></th>";
+echo "<th colspan='2'>CARCASSE</th>";
+echo "<th colspan='2'>GARNISSAGE</th>";
+echo "<th colspan='2'>PIQUAGE BANDES</th>";
+echo "<th colspan='2'>DECOUPE DES FACES</th>";
+echo "<th colspan='2'>COUTURES FACE+BANDE</th>";
+echo "<th colspan='2'>REMBOURAGE + HABILLAGE</th>";
+echo "<th colspan='2'>BORDEUSE</th>";
+echo "<th colspan='2'>CAPITONNAGE</th>";
+echo "<th colspan='2'>EMBALLAGE</th>";
+
+echo "</tr>";
+echo "<tr>";
+echo "<th>CLIENT</th>";
+echo "<th>NºCMD</th>";
+echo "<th>NºOF</th>";
+echo "<th style='width: 200px;'>Date OF</th>";
+echo "<th>CODE ARTICLE</th>";
+echo "<th style='width: 200px;'>LIBELLE</th>";
+echo "<th>QTE QMD</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+echo "<th>Entré</th>";
+echo "<th>Sortie</th>";
+
+echo "</tr>";
+
+foreach ($mergedData as $row) {
+    echo "<tr>";
+    echo "<td>" . (isset($row['GPA_LIBELLE']) ? $row['GPA_LIBELLE'] : 'STOCK') . "</td>";
+    echo "<td>" . $row["WOL_NUMERO"] . "</td>";
+    echo "<td>" . $row["WOL_LIGNEORDRE"] . "</td>";
+    echo "<td>" . $row["WOL_DATECREATION"]->format("d/m/Y H:i:s") . "</td>";
+    echo "<td>" . $row["WOL_CODEARTICLE"] . "</td>";
+    echo "<td>" . $row["WOL_LIBELLE"] . "</td>";
+    echo "<td>" . $row["WOP_QACCSAIS"] . "</td>";
+
+    // Afficher WOP_QLANSAIS et WOP_QRECSAIS dans des colonnes distinctes
+    $qlansaisValues = explode(" ", $row["WOP_QLANSAIS"]);
+    $qrecsaisValues = explode(" ", $row["WOP_QRECSAIS"]);
+
+    // Assurez-vous que les deux tableaux ont la même longueur
+    $count = max(count($qlansaisValues), count($qrecsaisValues));
+
+    for ($i = 0; $i < $count; $i++) {
+        $qlansais = isset($qlansaisValues[$i]) ? $qlansaisValues[$i] : "";
+        $qrecsais = isset($qrecsaisValues[$i]) ? $qrecsaisValues[$i] : "";
+
+        // Vérifiez si la valeur est différente de zéro et colorez en vert si nécessaire
+        $qlansaisStyle = ($qlansais != 0) ? 'style="background-color: green;color:black;"' : '';
+        $qrecsaisStyle = ($qrecsais != 0) ? 'style="background-color: green;color:black;"' : '';
+
+        echo "<td $qlansaisStyle>$qlansais</td><td $qrecsaisStyle>$qrecsais</td>";
+    }
+
+    echo "</tr>";
+}
+
+echo "</table>";
+
+
+// Fermer la connexion à la base de données
+sqlsrv_close($conn);
+
+?>
+</body>
+</html>

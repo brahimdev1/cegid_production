@@ -115,6 +115,8 @@ sqlsrv_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+
+
     <style>
        
         .custom-margin {
@@ -272,8 +274,7 @@ document.addEventListener('submit', function () {
 
     <script>
        
-
-        const scanner = new Html5QrcodeScanner('reader', {
+const scanner = new Html5QrcodeScanner('reader', {
             qrbox: {
                 width: 250,
                 height: 150,

@@ -138,7 +138,10 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 					<i class="material-icons">grid_on</i><span>Gestion</span></a>
                     <ul class="collapse list-unstyled menu" id="pageSubmenu6">
                         <li>
-                            <a href="Monitoring.php">Suivie de Production</a>
+                            <a href="Monitoring.php">Suivie de Production Magasin</a>
+                        </li>
+                        <li>
+                            <a href="Monitoring-Marche.php">Suivie de Production Marche</a>
                         </li>
                      
                     </ul>
