@@ -48,11 +48,25 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
                 <h3><img src="medidis.png" style="width: 180px; height: 40px;"/></h3>
             </div>
             <ul class="list-unstyled components">
-			<li  class="active">
+			<!--<li  class="active">
                     <a href="get,post.php" class="dashboard"><i class="material-icons" id="dashboard-link">dashboard</i>
 					<span>Lancement & Réception</span></a>
+                </li> -->
+                <li class="dropdown">
+                    <a href="#pageSubmenu1" data-toggle="collapse" aria-expanded="false" 
+					class="dropdown-toggle">
+					<i class="material-icons">grid_on</i><span>Action</span></a>
+                    <ul class="collapse list-unstyled menu" id="pageSubmenu1">
+                        <li>
+                            <a href="lancement.php">Reception</a>
+                        </li>
+                        <li>
+                            <a href="get,post.php">Lancement & Réception</a>
+                        </li>
+                     
+                    </ul>
                 </li>
-		
+
                 
 
                 <li  class="">
@@ -135,7 +149,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
                 <li class="dropdown">
                     <a href="#pageSubmenu6" data-toggle="collapse" aria-expanded="false" 
 					class="dropdown-toggle">
-					<i class="material-icons">grid_on</i><span>Gestion</span></a>
+					<i class="material-icons">library_books</i><span>Gestion</span></a>
                     <ul class="collapse list-unstyled menu" id="pageSubmenu6">
                         <li>
                             <a href="Monitoring.php">Suivie de Production Magasin</a>

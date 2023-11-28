@@ -88,10 +88,7 @@ include 'Home.php';
             <option value="magasin25">ISTIKBAL AGADIR TILILA</option>
             <option value="magasin26">YADECO MARRAKECH</option>
             <option value="magasin27">YATOUT HOME AGADIR</option>
-
         </select>
-    
-
     <div id="photoMagasin">
         <img src="" alt="Photo du magasin">
     </div>

@@ -54,7 +54,7 @@ if ($row) {
     // Rediriger vers la page appropriée en fonction du type d'utilisateur
     if ($row["usertype"] === "user" || $row["usertype"] === "admin") {
         // Rediriger vers le tableau de bord
-        header("Location: home.php");
+        header("Location: lancement.php");
     }
     exit();
 } else {
@@ -70,9 +70,9 @@ if ($row) {
 
         // Rediriger vers la page appropriée en fonction du type d'utilisateur
         if ($row["usertype"] === "user") {
-            header("Location: home.php");
+            header("Location: lancement.php");
         } elseif ($row["usertype"] === "admin") {
-            header("Location: home.php");
+            header("Location: lancement.php");
         }
         exit();
     } else {
