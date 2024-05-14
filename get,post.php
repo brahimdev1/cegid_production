@@ -17,56 +17,111 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $qteLancee = $row["WOP_QLANSAIS"];
         $qteReceptionnee = $row["WOP_QRECSAIS"];
         $qteRestante = $qteAccepte - $qteReceptionnee;
+        $quantite = $_POST["quantite"];
 
-        // Vérifier si le formulaire a été soumis pour lancer la production
-        if (isset($_POST["submit_lancer"])) {
+      // Vérifier si le formulaire a été soumis pour lancer la production
+if (isset($_POST["submit_lancer"])) {
+    // Obtenez la valeur de la colonne WOP_OPECIRC pour la phase actuelle
+    $phaseActuelle = $row["WOP_OPECIRC"];
+    $OFActuelle = $row["WOP_LIGNEORDRE"];
+      
+
+    
+
+
+    // Requête pour obtenir la phase précédente la plus proche
+    $sqlPhasePrecedenteProche = "SELECT TOP 1 WOP_QRECSAIS FROM WORDREPHASE WHERE WOP_OPECIRC < ? AND WOP_LIGNEORDRE = ?  ORDER BY WOP_OPECIRC DESC";
+   
+   
+    $paramsPhasePrecedenteProche = array($phaseActuelle,$OFActuelle );
+    $resultPhasePrecedenteProche = sqlsrv_query($conn, $sqlPhasePrecedenteProche, $paramsPhasePrecedenteProche);
+
+    if ($resultPhasePrecedenteProche !== false && sqlsrv_has_rows($resultPhasePrecedenteProche)) {
+        $rowPhasePrecedenteProche = sqlsrv_fetch_array($resultPhasePrecedenteProche, SQLSRV_FETCH_ASSOC);
+        $qteReceptionneePhasePrecedente = $rowPhasePrecedenteProche["WOP_QRECSAIS"];
+    
+    
+        // Comparer la quantité totale déjà produite avec la quantité à lancer
+        if ($quantite + $qteLancee > $qteReceptionneePhasePrecedente ) {
+            // Bloquer le lancement si la quantité totale déjà produite est supérieure ou égale à la quantité à lancer
+            ?>
+            <div class="error">
+                <?php echo "Erreur : La quantité lancé depasse la quantité receptionné du phase précédente."; ?>
+            </div>
+            <?php
+        } else {
+            // Lancer la production si la quantité reçue de la phase précédente est suffisante
+            // Insérez ici votre logique pour le lancement de la production
+
             // Vérifier si la quantité restante est supérieure à zéro
-            if ($qteReceptionnee == 0 )  {
-                $quantite = $_POST["quantite"];
+            if ($quantite + $qteLancee <= $qteAccepte) {
                 $nouvelleQteLancee = $qteLancee + $quantite;
-        
+
                 // Mettre à jour la quantité lancée dans la table
                 $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ?, WOP_ETATPHASE='LAN' WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
                 $params = array($nouvelleQteLancee, $numFabrication);
                 $result = sqlsrv_query($conn, $sql, $params);
-        
+
                 if ($result === false) {
                     die(print_r(sqlsrv_errors(), true));
                 }
-        
+
                 // Redirection vers la page success.php après le traitement du formulaire
                 echo "<script> window.location.href='success_Lan.php';</script>";
             } else {
-                // Mettre à jour la quantité lancée dans la table
-                $quantite = $_POST["quantite"];
-                $nouvelleQteLancee = $qteLancee + $quantite;
-                $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ?, WOP_ETATPHASE='REC' WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
-                $params = array($nouvelleQteLancee, $numFabrication);
-                $result = sqlsrv_query($conn, $sql, $params);
-        
-                if ($result === false) {
-                    die(print_r(sqlsrv_errors(), true));
-                }
-        
-                echo "<script> window.location.href='success_Lan.php';</script>";
-                    ?>
-                    
-                    <?php
-                }
-            } else {
-               
+                // Afficher une erreur si la quantité à lancer dépasse la quantité acceptée
                 ?>
                 <div class="error">
-                    <?php  echo "Erreur de saisie d'rdre de fabrication."; ?>
+                    <?php echo "Erreur : La quantité à lancer dépasse la quantité acceptée."; ?>
                 </div>
                 <?php
             }
         }
+    } elseif ($quantite + $qteLancee <= $qteAccepte) {
+        
+            $nouvelleQteLancee = $qteLancee + $quantite;
+
+            // Mettre à jour la quantité lancée dans la table
+            $sql = "UPDATE WORDREPHASE SET WOP_QLANSAIS = ?, WOP_ETATPHASE='LAN' WHERE CAST(WOP_LIGNEORDRE AS varchar) + '$' + WOP_PHASE = ?";
+            $params = array($nouvelleQteLancee, $numFabrication);
+            $result = sqlsrv_query($conn, $sql, $params);
+
+            if ($result === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
+            // Redirection vers la page success.php après le traitement du formulaire
+            echo "<script> window.location.href='success_Lan.php';</script>";
+        } else{
+            ?>
+            <div class="error">
+                <?php echo "Erreur : quantite lancé depasse la quantité accepté."; ?>
+            </div>
+            <?php
+        }
+
+        if ($result === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }
+
+   
+}
+
+    } else {
+        // Gérer l'erreur si la récupération de la quantité de la phase précédente échoue
+        ?>
+        <div class="error">
+            <?php echo "Erreur : Impossible de récupérer la quantité de la phase précédente."; ?>
+        </div>
+        <?php
+    }
+}
+    
 
        // Vérifier si le formulaire a été soumis pour réceptionner la production
 if (isset($_POST["submit_reception"])) {
     // Vérifier si la quantité restante est supérieure à zéro
-    if ($qteRestante > 0 && $qteReceptionnee < $qteAccepte) {
+    //if ($qteRestante > 0 && $qteReceptionnee < $qteAccepte) {
+        if ($quantite+$qteReceptionnee <= $qteLancee  )  {
         $quantite = $_POST["quantite"];
         $nouvelleQteReceptionnee = $qteReceptionnee + $quantite;
         $qteRestante = $qteAccepte - $nouvelleQteReceptionnee;
@@ -87,19 +142,12 @@ if (isset($_POST["submit_reception"])) {
                     
                     ?>
                     <div class="error">
-                        <?php echo "Erreur lors de la réception de la quantité."; ?>
+                        <?php echo "Erreur : la quantité receptionné depasse la quantité accepté."; ?>
                     </div>
                     <?php
                 }
-            } else {
-                
-                ?>
-                <div class="error">
-                    <?php echo "Erreur de saisie d'rdre de fabrication."; ?>
-                </div>
-                <?php
             }
-        }
+        
   
 
 
@@ -235,7 +283,7 @@ sqlsrv_close($conn);
 
             <div class="mb-3 custom-margin">
                 <label for="quantite" class="form-label">Quantité :</label>
-                <input type="number" class="form-control" id="quantite" name="quantite" placeholder="Qte a Saisir" required>
+                <input type="tel" class="form-control" id="quantite" name="quantite" placeholder="Qte a Saisir" required pattern="\d+([,.]\d+)?">
             </div>
            
             <div class="d-grid gap-2 custom-margin">
@@ -268,7 +316,7 @@ document.addEventListener('submit', function () {
 
     </script>
     <main>
-        <div id="reader"></div>
+     <!-- <div id="reader"></div> -->
         <div id="result"></div>
     </main>
 

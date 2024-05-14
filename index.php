@@ -54,7 +54,7 @@ if ($row) {
     // Rediriger vers la page appropriée en fonction du type d'utilisateur
     if ($row["usertype"] === "user" || $row["usertype"] === "admin") {
         // Rediriger vers le tableau de bord
-        header("Location: lancement.php");
+        header("Location: REC_production.php");
     }
     exit();
 } else {

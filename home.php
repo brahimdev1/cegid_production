@@ -57,20 +57,24 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 					class="dropdown-toggle">
 					<i class="material-icons">grid_on</i><span>Action</span></a>
                     <ul class="collapse list-unstyled menu" id="pageSubmenu1">
-                        <li>
-                            <a href="lancement.php">Reception</a>
-                        </li>
+                       
                         <li>
                             <a href="get,post.php">Lancement & Réception</a>
                         </li>
-                     
+                        <li>
+                            <a href="REC_production.php">Réception</a>
+                        </li>                     
                     </ul>
                 </li>
 
                 
+                <li  class="">
+                    <a href="Monitoring.php"><i class="material-icons">aspect_ratio</i><span> Ordres de Production
+					</span></a>
+                </li>
 
                 <li  class="">
-                    <a href="Grid.php"><i class="material-icons">aspect_ratio</i><span>Production
+                    <a href="Grid.php"><i class="material-icons">aspect_ratio</i><span>Gestion  
 					</span></a>
                 </li>
                
@@ -145,7 +149,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
                         </li>
                     </ul>
                 </li>
-               
+               <!--
                 <li class="dropdown">
                     <a href="#pageSubmenu6" data-toggle="collapse" aria-expanded="false" 
 					class="dropdown-toggle">
@@ -166,7 +170,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 					</span></a>
                 </li>
              
-               
+-->
                
             </ul>
 
